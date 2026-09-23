@@ -1,14 +1,5 @@
-name: Build All Platforms
-
-on:
-  push:
-    branches: [ main ]
-  workflow_dispatch: {}
-
-jobs:
-  # 1. Android APK Build
-  android:
-    name: Build Android APK
+linux:
+    name: Build Linux App
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -17,77 +8,14 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v4
-
-      - name: Build Android APK
-        run: ./gradlew :composeApp:assembleDebug
-
-      - name: Upload Android APK
-        uses: actions/upload-artifact@v4
-        with:
-          name: android-apk
-          path: composeApp/build/outputs/apk/debug/*.apk
-
-  # 2. Windows Installer (.msi)
-  windows:
-    name: Build Windows Installer
-    runs-on: windows-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-java@v4
-        with:
-          distribution: 'temurin'
-          java-version: '17'
+      - name: Install packaging dependencies
+        run: sudo apt-get update && sudo apt-get install -y fakeroot dpkg
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
 
-      - name: Build Windows Package
-        run: .\gradlew.bat :composeApp:packageMsi
-
-      - name: Upload Windows Installer
-        uses: actions/upload-artifact@v4
-        with:
-          name: windows-installer
-          path: composeApp/build/compose/binaries/main/msi/*.msi
-
-  # 3. macOS Installer (.dmg)
-  mac:
-    name: Build macOS Installer
-    runs-on: macos-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-java@v4
-        with:
-          distribution: 'temurin'
-          java-version: '17'
-
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v4
-
-      - name: Build macOS Package
-        run: ./gradlew :composeApp:packageDmg
-
-      - name: Upload macOS Installer
-        uses: actions/upload-artifact@v4
-        with:
-          name: mac-installer
-          path: composeApp/build/compose/binaries/main/dmg/*.dmg
-
-  # 4. Linux Installer (.deb)
-  linux:
-    name: Build Linux Installer
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-java@v4
-        with:
-          distribution: 'temurin'
-          java-version: '17'
-
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v4
+      - name: Make gradlew executable
+        run: chmod +x gradlew
 
       - name: Build Linux Package
         run: ./gradlew :composeApp:packageDeb
